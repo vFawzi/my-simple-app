@@ -1,4 +1,4 @@
-name: GCP Workload Identity PoC
+name: GCP Workload Identity PoC - Diagnostic
 
 on:
   push:
@@ -9,30 +9,37 @@ jobs:
   deploy-to-gcs:
     runs-on: ubuntu-latest
 
-    # Add permissions to request the OIDC token
     permissions:
       contents: read
       id-token: write
 
     steps:
-    # THIS IS THE FIX: Add the checkout step first
     - name: 'Checkout repository'
       uses: 'actions/checkout@v4'
 
     - name: 'Authenticate to Google Cloud'
+      id: auth
       uses: 'google-github-actions/auth@v2'
       with:
-        # The Workload Identity Provider resource name from your HUB project
         workload_identity_provider: 'projects/442678282814/locations/global/workloadIdentityPools/github-poc-pool/providers/github-provider'
-        
-        # The Service Account email from your SPOKE project
         service_account: 'spoke-impersonation-sa@asml-gke-01.iam.gserviceaccount.com'
 
-    - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v2'
-
+    # THIS IS THE CRITICAL DIAGNOSTIC STEP
+    - name: 'Verify GCP Authentication and Access'
+      run: |-
+        echo "===================================================================="
+        echo "Attempting to verify authentication status..."
+        gcloud auth list
+        
+        echo "===================================================================="
+        echo "Attempting to access a GCP resource to validate token scopes..."
+        # This command attempts a simple read-only action against the project.
+        # If it fails, it will provide a much more specific error about permissions.
+        gcloud projects describe asml-gke-01 --format="value(projectNumber)"
+        echo "===================================================================="
+      
+    # This step will likely not be reached, but is left for completeness
     - name: 'Write a file to GCS'
       run: |-
         echo "Hello from GitHub Actions, via WIF Hub-and-Spoke!" > proof.txt
         gsutil cp proof.txt gs://spoke-project-poc-bucket/proof.txt
-
