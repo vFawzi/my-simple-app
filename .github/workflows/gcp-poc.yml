@@ -15,8 +15,11 @@ jobs:
       id-token: write
 
     steps:
+    # THIS IS THE FIX: Add the checkout step first
+    - name: 'Checkout repository'
+      uses: 'actions/checkout@v4'
+
     - name: 'Authenticate to Google Cloud'
-      id: auth # Add an ID to this step to reference its outputs
       uses: 'google-github-actions/auth@v2'
       with:
         # The Workload Identity Provider resource name from your HUB project
@@ -25,24 +28,6 @@ jobs:
         # The Service Account email from your SPOKE project
         service_account: 'spoke-impersonation-sa@asml-gke-01.iam.gserviceaccount.com'
 
-        # ADDITION 1: Enable verbose debug logging for the auth action
-        debug: true
-
-    # ADDITION 2: New step to print the OIDC token details
-    - name: 'Print OIDC Token for Debugging'
-      run: |
-        echo "===================================================================="
-        echo "                OIDC TOKEN DEBUG INFORMATION"
-        echo "===================================================================="
-        echo "Step Output Token: ${{ steps.auth.outputs.token }}"
-        echo ""
-        echo "Decoding OIDC Token Header:"
-        echo "${{ steps.auth.outputs.token }}" | cut -d '.' -f 1 | base64 -d 2>/dev/null || echo "Invalid Header"
-        echo ""
-        echo "Decoding OIDC Token Payload:"
-        echo "${{ steps.auth.outputs.token }}" | cut -d '.' -f 2 | base64 -d 2>/dev/null || echo "Invalid Payload"
-        echo "===================================================================="
-
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v2'
 
@@ -50,3 +35,4 @@ jobs:
       run: |-
         echo "Hello from GitHub Actions, via WIF Hub-and-Spoke!" > proof.txt
         gsutil cp proof.txt gs://spoke-project-poc-bucket/proof.txt
+
