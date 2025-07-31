@@ -1,0 +1,22 @@
+name: Test ARC to GCP Spoke Project
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-gcs-bucket-in-spoke:
+    runs-on: self-hosted
+    steps:
+      - name: 'Check GCP Identity'
+        run: |
+          echo "--- Verifying ambient GCP credentials ---"
+          gcloud auth list
+          echo "--- GCP Project Configuration ---"
+          gcloud config list
+
+      - name: 'Create GCS Bucket in Spoke Project'
+        run: |
+          BUCKET_NAME="arc-created-bucket-$(date +%s)"
+          echo "--- Attempting to create bucket: gs://${BUCKET_NAME} ---"
+          gsutil mb -p asml-gke-01 gs://${BUCKET_NAME}
+          echo "--- Bucket creation command executed successfully! ---"
