@@ -35,4 +35,4 @@ jobs:
           BUCKET_NAME="team-a-bucket-$(date +%s)"
           echo "--- Attempting to create bucket: gs://${BUCKET_NAME} ---"
           gsutil mb -p asml-gke-01 gs://${BUCKET_NAME}
-          echo "--- gsutil mb command executed. ---"
+          echo "--- gsutil mb command executed. ----"
