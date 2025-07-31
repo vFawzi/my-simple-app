@@ -10,29 +10,29 @@ permissions:
 jobs:
   deploy-to-spoke-b:
     runs-on: self-hosted
-    environment: team-b-prod # <-- This is the key identity link
+    environment: team-b-prod # <-- The key identity link for Team B
 
     steps:
-      # Step 1: Install the gcloud CLI in the runner
+      # Step 1: Install the gcloud CLI in the runner environment
       - name: 'Set up Google Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
 
-      # Step 2: Authenticate to GCP using the project number
+      # Step 2: Authenticate to GCP using the correct WIF Pool and SA
       - name: 'Authenticate as Team B'
         id: auth
         uses: 'google-github-actions/auth@v2'
         with:
-           workload_identity_provider: 'projects/442678282814/locations/global/workloadIdentityPools/github-environments-pool-v2/providers/github-provider'
+          workload_identity_provider: 'projects/442678282814/locations/global/workloadIdentityPools/github-environments-pool-v2/providers/github-provider'
           service_account: 'team-b-gsa@faas-001.iam.gserviceaccount.com'
 
       # Step 3: Verify the correct identity was assumed
       - name: 'Verify Identity'
         run: gcloud auth list
 
-      # Step 4: Create the bucket in the correct Spoke project
+      # Step 4: Create the bucket in the correct Spoke project (faas-001)
       - name: 'Create GCS Bucket in Spoke Project B'
         run: |
           BUCKET_NAME="team-b-bucket-$(date +%s)"
           echo "--- Attempting to create bucket: gs://${BUCKET_NAME} ---"
           gsutil mb -p faas-001 gs://${BUCKET_NAME}
-          echo "--- gsutil mb command executed. ---"
+          echo "--- gsutil mb command executed successfully. ---"
