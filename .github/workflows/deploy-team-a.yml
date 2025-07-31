@@ -22,7 +22,7 @@ jobs:
         id: auth
         uses: 'google-github-actions/auth@v2'
         with:
-          workload_identity_provider: 'projects/442678282814/locations/global/workloadIdentityPools/github-environments-pool/providers/github-provider'
+          workload_identity_provider: 'projects/442678282814/locations/global/workloadIdentityPools/github-environments-pool-v2/providers/github-provider'
           service_account: 'team-a-gsa@asml-gke-01.iam.gserviceaccount.com'
 
       # Step 3: Verify the correct identity was assumed
