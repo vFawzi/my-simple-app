@@ -13,7 +13,7 @@ jobs:
     environment: team-a-prod
 
     steps:
-      # NEW STEP: Install the gcloud CLI
+      # This was the crucial missing piece
       - name: 'Set up Google Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
 
@@ -21,8 +21,8 @@ jobs:
         id: auth
         uses: 'google-github-actions/auth@v2'
         with:
-          # Make sure to replace [HUB_PROJECT_NUMBER] with the number for kms-autokey-01
-          workload_identity_provider: 'projects/[HUB_PROJECT_NUMBER]/locations/global/workloadIdentityPools/github-environments-pool/providers/github-provider'
+          # Remember to replace [HUB_PROJECT_NUMBER] with the real number
+          workload_identity_provider: 'projects/442678282814/locations/global/workloadIdentityPools/github-environments-pool/providers/github-provider'
           service_account: 'team-a-gsa@asml-gke-01.iam.gserviceaccount.com'
 
       - name: 'Verify Identity'
@@ -33,4 +33,4 @@ jobs:
           BUCKET_NAME="team-a-bucket-$(date +%s)"
           echo "--- Attempting to create bucket: gs://${BUCKET_NAME} ---"
           gsutil mb -p asml-gke-01 gs://${BUCKET_NAME}
-          echo "--- gsutil command executed. ---"
+          echo "--- gsutil mb command executed successfully. ---"
