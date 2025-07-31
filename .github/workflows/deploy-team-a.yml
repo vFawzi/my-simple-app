@@ -1,0 +1,29 @@
+name: Deploy for Team A
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-to-spoke-a:
+    runs-on: self-hosted
+    environment: team-a-prod # <-- This is the key identity link
+
+    steps:
+      - name: 'Authenticate as Team A'
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: 'projects/442678282814/locations/global/workloadIdentityPools/github-environments-pool/providers/github-provider'
+          service_account: 'team-a-gsa@asml-gke-01.iam.gserviceaccount.com'
+
+      - name: 'Verify Identity'
+        run: gcloud auth list
+
+      - name: 'Create GCS Bucket in Spoke Project A'
+        run: |
+          BUCKET_NAME="team-a-bucket-$(date +%s)"
+          gsutil mb -p asml-gke-01 gs://${BUCKET_NAME}
